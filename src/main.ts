@@ -1,4 +1,4 @@
-﻿import './style.css';
+import './style.css';
 
 const API = 'https://inai-col3.fishrungames.com';
 // JWT variant: access token is short-lived; refresh token is kept for this browser tab.
@@ -19,9 +19,9 @@ let accessToken = '';
 let refreshToken = sessionStorage.getItem('band_refresh_token') ?? '';
 let currentUser: User | null = null;
 let specializations: Specialization[] = [
-  { value: 'vocals', label: 'Р’РѕРєР°Р»' }, { value: 'guitar', label: 'Р“РёС‚Р°СЂР°' },
-  { value: 'bass', label: 'Р‘Р°СЃ-РіРёС‚Р°СЂР°' }, { value: 'drums', label: 'РЈРґР°СЂРЅС‹Рµ' },
-  { value: 'keys', label: 'РљР»Р°РІРёС€РЅС‹Рµ' }, { value: 'other', label: 'Р”СЂСѓРіРѕРµ' },
+  { value: 'vocals', label: 'Вокал' }, { value: 'guitar', label: 'Гитара' },
+  { value: 'bass', label: 'Бас-гитара' }, { value: 'drums', label: 'Ударные' },
+  { value: 'keys', label: 'Клавишные' }, { value: 'other', label: 'Другое' },
 ];
 
 async function request<T>(path: string, init: RequestInit = {}, authenticated = false): Promise<T> {
@@ -46,7 +46,7 @@ async function readError(response: Response): Promise<Error> {
   let data: ApiError = {};
   try { data = await response.json() as ApiError; } catch { /* response has no JSON body */ }
   const detail = data.detail ?? Object.entries(data).map(([key, value]) => `${key}: ${Array.isArray(value) ? value.join(' ') : String(value)}`).join('\n');
-  return new Error(detail || `РћС€РёР±РєР° Р·Р°РїСЂРѕСЃР° (${response.status})`);
+  return new Error(detail || `Ошибка запроса (${response.status})`);
 }
 
 async function refreshAccess(): Promise<boolean> {
@@ -92,7 +92,7 @@ function setBusy(form: HTMLFormElement, busy: boolean): void {
   form.querySelectorAll<HTMLButtonElement>('button[type="submit"]').forEach((button) => {
     button.disabled = busy;
     button.dataset.label ??= button.textContent ?? '';
-    button.textContent = busy ? 'РџРѕРґРѕР¶РґРёС‚РµвЂ¦' : button.dataset.label;
+    button.textContent = busy ? 'Подождите…' : button.dataset.label;
   });
 }
 
@@ -101,26 +101,26 @@ function renderAuth(mode: 'login' | 'register' = 'login'): void {
   app.innerHTML = `
     <main class="auth-layout">
       <section class="brand-panel">
-        <a class="wordmark" href="#" aria-label="РЎРѕСЃС‚Р°РІ, РЅР° РіР»Р°РІРЅСѓСЋ"><span class="wordmark__icon">РЎ</span> РЎРћРЎРўРђР’<span class="wordmark__dot">.</span></a>
-        <div class="brand-copy"><p class="eyebrow">РњРЈР—Р«РљРђ РЎРћР‘РР РђР•Рў РќРђРЎ</p><h1>РљР°Р¶РґС‹Р№ Р·РІСѓРє<br>РёРјРµРµС‚ <em>СЃРІРѕС‘ РјРµСЃС‚Рѕ.</em></h1><p class="brand-text">Р›РёС‡РЅС‹Р№ РєР°Р±РёРЅРµС‚ РјСѓР·С‹РєР°РЅС‚Р°. РќР°СЃС‚СЂРѕР№С‚Рµ СЃРІРѕР№ РїСЂРѕС„РёР»СЊ Рё РѕСЃС‚Р°РІР°Р№С‚РµСЃСЊ РЅР° СЃРІСЏР·Рё СЃ РіСЂСѓРїРїРѕР№.</p></div>
+        <a class="wordmark" href="#" aria-label="Состав, на главную"><span class="wordmark__icon">С</span> СОСТАВ<span class="wordmark__dot">.</span></a>
+        <div class="brand-copy"><p class="eyebrow">МУЗЫКА СОБИРАЕТ НАС</p><h1>Каждый звук<br>имеет <em>своё место.</em></h1><p class="brand-text">Личный кабинет музыканта. Настройте свой профиль и оставайтесь на связи с группой.</p></div>
         <div class="sound-wave" aria-hidden="true">${Array.from({ length: 42 }, (_, i) => `<i style="--h:${12 + ((i * 31 + i * i * 7) % 70)}px"></i>`).join('')}</div>
-        <p class="brand-foot">Р Р•РџР•РўРР РЈР•Рњ. РЎРћР—Р”РђРЃРњ. Р—Р’РЈР§РРњ.</p>
+        <p class="brand-foot">РЕПЕТИРУЕМ. СОЗДАЁМ. ЗВУЧИМ.</p>
       </section>
       <section class="auth-panel">
-        <div class="auth-top"><span class="status-dot"></span> РљРђР‘РРќР•Рў РЈР§РђРЎРўРќРРљРђ</div>
+        <div class="auth-top"><span class="status-dot"></span> КАБИНЕТ УЧАСТНИКА</div>
         <div class="auth-card">
-          <p class="eyebrow">${registering ? 'РќРћР’Р«Р™ РЈР§РђРЎРўРќРРљ' : 'РЎ Р РђР”РћРЎРўР¬Р® РЎРќРћР’Рђ'}</p>
-          <h2>${registering ? 'РџСЂРёСЃРѕРµРґРёРЅРёС‚СЊСЃСЏ' : 'РЎ РІРѕР·РІСЂР°С‰РµРЅРёРµРј'}</h2>
-          <p class="subheading">${registering ? 'РЎРѕР·РґР°Р№С‚Рµ Р°РєРєР°СѓРЅС‚, С‡С‚РѕР±С‹ Р·Р°СЏРІРёС‚СЊ Рѕ СЃРµР±Рµ.' : 'Р’РѕР№РґРёС‚Рµ РІ СЃРІРѕР№ Р°РєРєР°СѓРЅС‚ Рё РЅР°СЃС‚СЂРѕР№С‚Рµ РїСЂРѕС„РёР»СЊ.'}</p>
+          <p class="eyebrow">${registering ? 'НОВЫЙ УЧАСТНИК' : 'С РАДОСТЬЮ СНОВА'}</p>
+          <h2>${registering ? 'Присоединиться' : 'С возвращением'}</h2>
+          <p class="subheading">${registering ? 'Создайте аккаунт, чтобы заявить о себе.' : 'Войдите в свой аккаунт и настройте профиль.'}</p>
           <div id="notice" class="notice" role="status" hidden></div>
           <form id="auth-form" class="form-stack">
-            <label class="field"><span>РРјСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ</span><input name="username" autocomplete="username" minlength="1" maxlength="150" placeholder="РЅР°РїСЂРёРјРµСЂ, alex_music" required></label>
-            <label class="field"><span>РџР°СЂРѕР»СЊ</span><input name="password" type="password" autocomplete="${registering ? 'new-password' : 'current-password'}" minlength="${registering ? '6' : '1'}" placeholder="${registering ? 'РќРµ РјРµРЅРµРµ 6 СЃРёРјРІРѕР»РѕРІ' : 'Р’РІРµРґРёС‚Рµ РїР°СЂРѕР»СЊ'}" required></label>
-            <button class="button button--primary" type="submit">${registering ? 'РЎРѕР·РґР°С‚СЊ Р°РєРєР°СѓРЅС‚' : 'Р’РѕР№С‚Рё'} <span aria-hidden="true">в†—</span></button>
+            <label class="field"><span>Имя пользователя</span><input name="username" autocomplete="username" minlength="1" maxlength="150" placeholder="например, alex_music" required></label>
+            <label class="field"><span>Пароль</span><input name="password" type="password" autocomplete="${registering ? 'new-password' : 'current-password'}" minlength="${registering ? '6' : '1'}" placeholder="${registering ? 'Не менее 6 символов' : 'Введите пароль'}" required></label>
+            <button class="button button--primary" type="submit">${registering ? 'Создать аккаунт' : 'Войти'} <span aria-hidden="true">↗</span></button>
           </form>
-          <p class="switch-mode">${registering ? 'РЈР¶Рµ РµСЃС‚СЊ Р°РєРєР°СѓРЅС‚?' : 'Р’РїРµСЂРІС‹Рµ Р·РґРµСЃСЊ?'} <button class="text-button" id="switch-mode" type="button">${registering ? 'Р’РѕР№С‚Рё' : 'РЎРѕР·РґР°С‚СЊ Р°РєРєР°СѓРЅС‚'}</button></p>
+          <p class="switch-mode">${registering ? 'Уже есть аккаунт?' : 'Впервые здесь?'} <button class="text-button" id="switch-mode" type="button">${registering ? 'Войти' : 'Создать аккаунт'}</button></p>
         </div>
-        <p class="auth-legal">Р›РР§РќР«Р™ РљРђР‘РРќР•Рў РњРЈР—Р«РљРђРќРўРђ <span>В·</span> 2026</p>
+        <p class="auth-legal">ЛИЧНЫЙ КАБИНЕТ МУЗЫКАНТА <span>·</span> 2026</p>
       </section>
     </main>`;
 
@@ -135,14 +135,14 @@ function renderAuth(mode: 'login' | 'register' = 'login'): void {
         method: 'POST', body: JSON.stringify({ username: data.get('username'), password: data.get('password') }),
       });
       accessToken = result.access;
-      if (!result.refresh) throw new Error('РЎРµСЂРІРµСЂ РЅРµ РІРµСЂРЅСѓР» refresh-С‚РѕРєРµРЅ.');
+      if (!result.refresh) throw new Error('Сервер не вернул refresh-токен.');
       saveRefreshToken(result.refresh);
       currentUser = result.user ?? await request<User>('/api/profile/', {}, true);
       await loadSpecializations();
       renderProfile();
-      showMessage(registering ? 'РђРєРєР°СѓРЅС‚ СЃРѕР·РґР°РЅ. Р”РѕР±СЂРѕ РїРѕР¶Р°Р»РѕРІР°С‚СЊ!' : 'Р’С‹ РІРѕС€Р»Рё РІ Р°РєРєР°СѓРЅС‚.', 'success');
+      showMessage(registering ? 'Аккаунт создан. Добро пожаловать!' : 'Вы вошли в аккаунт.', 'success');
     } catch (error) {
-      showMessage(error instanceof Error ? error.message : 'РќРµ СѓРґР°Р»РѕСЃСЊ РІС‹РїРѕР»РЅРёС‚СЊ Р·Р°РїСЂРѕСЃ.', 'error');
+      showMessage(error instanceof Error ? error.message : 'Не удалось выполнить запрос.', 'error');
       setBusy(form, false);
     }
   });
@@ -159,23 +159,23 @@ function renderProfile(): void {
   const initials = (profile.first_name || currentUser.username).slice(0, 1).toUpperCase();
   app.innerHTML = `
     <main class="dashboard">
-      <header class="topbar"><a class="wordmark wordmark--dark" href="#"><span class="wordmark__icon">РЎ</span> РЎРћРЎРўРђР’<span class="wordmark__dot">.</span></a><div class="topbar__right"><span class="online-label"><i></i> Р’ РЎР•РўР</span><button class="logout-button" id="logout" type="button">Р’С‹Р№С‚Рё <span aria-hidden="true">в†—</span></button></div></header>
-      <section class="profile-hero"><div><p class="eyebrow">Р›РР§РќР«Р™ РљРђР‘РРќР•Рў / РЈР§РђРЎРўРќРРљ</p><h1>РњРѕР№ <em>РїСЂРѕС„РёР»СЊ.</em></h1><p class="hero-copy">Р Р°СЃСЃРєР°Р¶РёС‚Рµ РіСЂСѓРїРїРµ Рѕ СЃРµР±Рµ Рё СЃРІРѕС‘Рј Р·РІСѓС‡Р°РЅРёРё.</p></div><div class="hero-mark" aria-hidden="true">в™«</div></section>
+      <header class="topbar"><a class="wordmark wordmark--dark" href="#"><span class="wordmark__icon">С</span> СОСТАВ<span class="wordmark__dot">.</span></a><div class="topbar__right"><span class="online-label"><i></i> В СЕТИ</span><button class="logout-button" id="logout" type="button">Выйти <span aria-hidden="true">↗</span></button></div></header>
+      <section class="profile-hero"><div><p class="eyebrow">ЛИЧНЫЙ КАБИНЕТ / УЧАСТНИК</p><h1>Мой <em>профиль.</em></h1><p class="hero-copy">Расскажите группе о себе и своём звучании.</p></div><div class="hero-mark" aria-hidden="true">♫</div></section>
       <section class="profile-grid">
-        <aside class="identity-card"><div class="avatar">${escapeHtml(initials)}</div><span class="member-tag"><i></i> РЈР§РђРЎРўРќРРљ Р“Р РЈРџРџР«</span><h2>${escapeHtml(profile.first_name || currentUser.username)}</h2><p class="identity-user">@${escapeHtml(currentUser.username)}</p><div class="identity-divider"></div><p class="member-number">РЈР§РђРЎРўРќРРљ в„– <strong>${String(currentUser.id).padStart(3, '0')}</strong></p><p class="identity-note">Р’Р°С€ РїСЂРѕС„РёР»СЊ РІРёРґРµРЅ РѕСЂРіР°РЅРёР·Р°С‚РѕСЂР°Рј РіСЂСѓРїРїС‹.</p></aside>
-        <section class="edit-card"><div class="card-heading"><div><p class="eyebrow">Р’РђРЁРђ РРќР¤РћР РњРђР¦РРЇ</p><h2>Р”Р°РЅРЅС‹Рµ РїСЂРѕС„РёР»СЏ</h2></div><span class="edit-icon" aria-hidden="true">вњі</span></div>
+        <aside class="identity-card"><div class="avatar">${escapeHtml(initials)}</div><span class="member-tag"><i></i> УЧАСТНИК ГРУППЫ</span><h2>${escapeHtml(profile.first_name || currentUser.username)}</h2><p class="identity-user">@${escapeHtml(currentUser.username)}</p><div class="identity-divider"></div><p class="member-number">УЧАСТНИК № <strong>${String(currentUser.id).padStart(3, '0')}</strong></p><p class="identity-note">Ваш профиль виден организаторам группы.</p></aside>
+        <section class="edit-card"><div class="card-heading"><div><p class="eyebrow">ВАША ИНФОРМАЦИЯ</p><h2>Данные профиля</h2></div><span class="edit-icon" aria-hidden="true">✳</span></div>
           <div id="notice" class="notice" role="status" hidden></div>
           <form id="profile-form" class="profile-form">
-            <label class="field"><span>РРјСЏ</span><input name="first_name" maxlength="100" value="${escapeHtml(profile.first_name)}" placeholder="РљР°Рє Рє РІР°Рј РѕР±СЂР°С‰Р°С‚СЊСЃСЏ"></label>
-            <label class="field"><span>РРјСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ</span><input value="${escapeHtml(currentUser.username)}" disabled><small>РРјСЏ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ РЅРµР»СЊР·СЏ РёР·РјРµРЅРёС‚СЊ</small></label>
-            <label class="field"><span>РЎРїРµС†РёР°Р»РёР·Р°С†РёСЏ</span><select name="specialization" required>${options}</select></label>
-            <label class="field"><span>Р“РѕРЅРѕСЂР°СЂ Р·Р° РІС‹СЃС‚СѓРїР»РµРЅРёРµ</span><div class="input-suffix"><input name="fee" inputmode="decimal" pattern="^-?\\d{0,8}(?:\\.\\d{0,2})?$" value="${escapeHtml(profile.fee)}" placeholder="0.00"><span>СЃРѕРј</span></div></label>
-            <label class="field field--wide"><span>Рћ СЃРµР±Рµ</span><textarea name="bio" rows="4" placeholder="Р Р°СЃСЃРєР°Р¶РёС‚Рµ Рѕ СЃРІРѕС‘Рј РѕРїС‹С‚Рµ, РёРЅСЃС‚СЂСѓРјРµРЅС‚Р°С… Рё РјСѓР·С‹РєРµвЂ¦">${escapeHtml(profile.bio)}</textarea></label>
-            <div class="form-actions"><p>РР·РјРµРЅРµРЅРёСЏ СЃРѕС…СЂР°РЅСЏСЋС‚СЃСЏ РІ РІР°С€РµРј РїСЂРѕС„РёР»Рµ.</p><button class="button button--primary" type="submit">РЎРѕС…СЂР°РЅРёС‚СЊ РёР·РјРµРЅРµРЅРёСЏ <span aria-hidden="true">в†—</span></button></div>
+            <label class="field"><span>Имя</span><input name="first_name" maxlength="100" value="${escapeHtml(profile.first_name)}" placeholder="Как к вам обращаться"></label>
+            <label class="field"><span>Имя пользователя</span><input value="${escapeHtml(currentUser.username)}" disabled><small>Имя пользователя нельзя изменить</small></label>
+            <label class="field"><span>Специализация</span><select name="specialization" required>${options}</select></label>
+            <label class="field"><span>Гонорар за выступление</span><div class="input-suffix"><input name="fee" inputmode="decimal" pattern="^-?\\d{0,8}(?:\\.\\d{0,2})?$" value="${escapeHtml(profile.fee)}" placeholder="0.00"><span>сом</span></div></label>
+            <label class="field field--wide"><span>О себе</span><textarea name="bio" rows="4" placeholder="Расскажите о своём опыте, инструментах и музыке…">${escapeHtml(profile.bio)}</textarea></label>
+            <div class="form-actions"><p>Изменения сохраняются в вашем профиле.</p><button class="button button--primary" type="submit">Сохранить изменения <span aria-hidden="true">↗</span></button></div>
           </form>
         </section>
       </section>
-      <footer class="page-footer"><span>РЎРћРЎРўРђР’. Р›РР§РќР«Р™ РљРђР‘РРќР•Рў РњРЈР—Р«РљРђРќРўРђ</span><span>РќРђРЎРўР РђРР’РђР™РўР• РџР РћР¤РР›Р¬ В· Р—Р’РЈР§РРўР• Р’РњР•РЎРўР•</span></footer>
+      <footer class="page-footer"><span>СОСТАВ. ЛИЧНЫЙ КАБИНЕТ МУЗЫКАНТА</span><span>НАСТРАИВАЙТЕ ПРОФИЛЬ · ЗВУЧИТЕ ВМЕСТЕ</span></footer>
     </main>`;
 
   document.querySelector<HTMLButtonElement>('#logout')!.addEventListener('click', async () => {
@@ -186,7 +186,7 @@ function renderProfile(): void {
     } catch { /* clear local session even when the refresh token has expired */ }
     clearSession();
     renderAuth();
-    showMessage('Р’С‹ РІС‹С€Р»Рё РёР· Р°РєРєР°СѓРЅС‚Р°.', 'success');
+    showMessage('Вы вышли из аккаунта.', 'success');
   });
 
   document.querySelector<HTMLFormElement>('#profile-form')!.addEventListener('submit', async (event) => {
@@ -201,9 +201,9 @@ function renderProfile(): void {
       const result = await request<User>('/api/profile/', { method: 'PATCH', body: JSON.stringify(payload) }, true);
       currentUser = result;
       renderProfile();
-      showMessage('РџСЂРѕС„РёР»СЊ СЃРѕС…СЂР°РЅС‘РЅ.', 'success');
+      showMessage('Профиль сохранён.', 'success');
     } catch (error) {
-      showMessage(error instanceof Error ? error.message : 'РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕС…СЂР°РЅРёС‚СЊ РїСЂРѕС„РёР»СЊ.', 'error');
+      showMessage(error instanceof Error ? error.message : 'Не удалось сохранить профиль.', 'error');
       setBusy(form, false);
     }
   });
